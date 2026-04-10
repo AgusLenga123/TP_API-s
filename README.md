@@ -5,6 +5,39 @@ Stack: **Node.js · Express · MongoDB (Mongoose) · JWT**
 
 ---
 
+## 🖥️ Setup en nueva máquina
+
+Si clonás este repo en otra computadora, seguí estos pasos:
+
+```bash
+# 1. Clonar el repositorio
+git clone https://github.com/AgusLenga123/TP_API-s.git
+cd TP_API-s
+
+# 2. Instalar dependencias
+npm install
+
+# 3. Crear el archivo de entorno
+copy .env.example .env   # Windows
+# cp .env.example .env   # Mac/Linux
+```
+
+Luego abrí el `.env` y completá:
+- `MONGODB_URI` → tu connection string de MongoDB Atlas (siempre disponible en [cloud.mongodb.com](https://cloud.mongodb.com) → Connect)
+- `JWT_SECRET` → generalo con `node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"`
+
+```bash
+# 4. Poblar la base de datos (primera vez)
+npm run seed
+
+# 5. Iniciar el servidor
+npm run dev
+```
+
+> ✅ La base de datos está en MongoDB Atlas (en la nube), así que los datos persisten entre máquinas automáticamente.
+
+---
+
 ## Instalación
 
 ```bash
