@@ -1,0 +1,615 @@
+{
+  "info": {
+    "name": "Basketball Liga API",
+    "description": "Colección completa para testear la API de Liga de Baloncesto Juvenil. Flujo recomendado: 1) Setup Admin → 2) Login → 3) Equipos → 4) Jugadores → 5) Partidos → 6) Resultados → 7) Clasificación",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3001/api", "type": "string" },
+    { "key": "token", "value": "", "type": "string" },
+    { "key": "equipoLocalId", "value": "", "type": "string" },
+    { "key": "equipoVisitanteId", "value": "", "type": "string" },
+    { "key": "jugadorId", "value": "", "type": "string" },
+    { "key": "partidoId", "value": "", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "🔧 0 - Health Check",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/health", "host": ["{{baseUrl}}"], "path": ["health"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🔐 1 - Auth",
+      "item": [
+        {
+          "name": "Crear Admin (setup inicial)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"usuario\": \"admin\",\n  \"password\": \"Admin1234!\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/setup", "host": ["{{baseUrl}}"], "path": ["auth", "setup"] }
+          }
+        },
+        {
+          "name": "Login (guarda token automáticamente)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.token) {",
+                  "  pm.collectionVariables.set('token', res.token);",
+                  "  console.log('✅ Token guardado');",
+                  "} else {",
+                  "  console.log('❌ No se encontró token en la respuesta');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"usuario\": \"admin\",\n  \"password\": \"Admin1234!\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] }
+          }
+        },
+        {
+          "name": "Login incorrecto (debe dar 401)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"usuario\": \"admin\",\n  \"password\": \"wrongpassword\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] }
+          }
+        },
+        {
+          "name": "Login sin campos (debe dar 400)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🏀 2 - Equipos",
+      "item": [
+        {
+          "name": "GET Todos los equipos (público)",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/equipos", "host": ["{{baseUrl}}"], "path": ["equipos"] }
+          }
+        },
+        {
+          "name": "POST Crear Equipo Local (guarda ID)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res._id) {",
+                  "  pm.collectionVariables.set('equipoLocalId', res._id);",
+                  "  console.log('✅ equipoLocalId guardado:', res._id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Los Tigres\",\n  \"entrenador\": \"Carlos Mendoza\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/equipos", "host": ["{{baseUrl}}"], "path": ["equipos"] }
+          }
+        },
+        {
+          "name": "POST Crear Equipo Visitante (guarda ID)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res._id) {",
+                  "  pm.collectionVariables.set('equipoVisitanteId', res._id);",
+                  "  console.log('✅ equipoVisitanteId guardado:', res._id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Los Leones\",\n  \"entrenador\": \"Roberto García\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/equipos", "host": ["{{baseUrl}}"], "path": ["equipos"] }
+          }
+        },
+        {
+          "name": "POST Crear sin token (debe dar 401)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Equipo Sin Auth\",\n  \"entrenador\": \"Nadie\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/equipos", "host": ["{{baseUrl}}"], "path": ["equipos"] }
+          }
+        },
+        {
+          "name": "POST Crear sin campos requeridos (debe dar 400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Solo Nombre\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/equipos", "host": ["{{baseUrl}}"], "path": ["equipos"] }
+          }
+        },
+        {
+          "name": "GET Equipo por ID",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/equipos/{{equipoLocalId}}", "host": ["{{baseUrl}}"], "path": ["equipos", "{{equipoLocalId}}"] }
+          }
+        },
+        {
+          "name": "PUT Editar Equipo",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Los Tigres FC\",\n  \"entrenador\": \"Carlos Mendoza Jr.\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/equipos/{{equipoLocalId}}", "host": ["{{baseUrl}}"], "path": ["equipos", "{{equipoLocalId}}"] }
+          }
+        },
+        {
+          "name": "GET ID inválido (debe dar 400)",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/equipos/id-no-valido", "host": ["{{baseUrl}}"], "path": ["equipos", "id-no-valido"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "👤 3 - Jugadores",
+      "item": [
+        {
+          "name": "GET Todos los jugadores (público)",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/jugadores", "host": ["{{baseUrl}}"], "path": ["jugadores"] }
+          }
+        },
+        {
+          "name": "GET Jugadores filtrados por equipo",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/jugadores?equipoId={{equipoLocalId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["jugadores"],
+              "query": [{ "key": "equipoId", "value": "{{equipoLocalId}}" }]
+            }
+          }
+        },
+        {
+          "name": "POST Crear Jugador 1 (equipo local)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res._id) {",
+                  "  pm.collectionVariables.set('jugadorId', res._id);",
+                  "  console.log('✅ jugadorId guardado:', res._id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Juan\",\n  \"apellido\": \"Pérez\",\n  \"categoria\": \"Sub-17\",\n  \"equipo\": \"{{equipoLocalId}}\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/jugadores", "host": ["{{baseUrl}}"], "path": ["jugadores"] }
+          }
+        },
+        {
+          "name": "POST Crear Jugador 2 (equipo local)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Lucas\",\n  \"apellido\": \"Rodríguez\",\n  \"categoria\": \"Sub-15\",\n  \"equipo\": \"{{equipoLocalId}}\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/jugadores", "host": ["{{baseUrl}}"], "path": ["jugadores"] }
+          }
+        },
+        {
+          "name": "POST Crear Jugador (equipo visitante)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Matías\",\n  \"apellido\": \"González\",\n  \"categoria\": \"Sub-17\",\n  \"equipo\": \"{{equipoVisitanteId}}\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/jugadores", "host": ["{{baseUrl}}"], "path": ["jugadores"] }
+          }
+        },
+        {
+          "name": "POST Crear sin campos requeridos (debe dar 400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Solo Nombre\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/jugadores", "host": ["{{baseUrl}}"], "path": ["jugadores"] }
+          }
+        },
+        {
+          "name": "GET Jugador por ID",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/jugadores/{{jugadorId}}", "host": ["{{baseUrl}}"], "path": ["jugadores", "{{jugadorId}}"] }
+          }
+        },
+        {
+          "name": "PUT Editar Jugador",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Juan Pablo\",\n  \"apellido\": \"Pérez\",\n  \"categoria\": \"Sub-19\",\n  \"equipo\": \"{{equipoLocalId}}\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/jugadores/{{jugadorId}}", "host": ["{{baseUrl}}"], "path": ["jugadores", "{{jugadorId}}"] }
+          }
+        },
+        {
+          "name": "DELETE Jugador",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/jugadores/{{jugadorId}}", "host": ["{{baseUrl}}"], "path": ["jugadores", "{{jugadorId}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "⚽ 4 - Partidos",
+      "item": [
+        {
+          "name": "GET Todos los partidos (público)",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/partidos", "host": ["{{baseUrl}}"], "path": ["partidos"] }
+          }
+        },
+        {
+          "name": "GET Partidos finalizados",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/partidos?finalizado=true",
+              "host": ["{{baseUrl}}"],
+              "path": ["partidos"],
+              "query": [{ "key": "finalizado", "value": "true" }]
+            }
+          }
+        },
+        {
+          "name": "GET Partidos pendientes",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/partidos?finalizado=false",
+              "host": ["{{baseUrl}}"],
+              "path": ["partidos"],
+              "query": [{ "key": "finalizado", "value": "false" }]
+            }
+          }
+        },
+        {
+          "name": "GET Partidos por equipo",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/partidos?equipoId={{equipoLocalId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["partidos"],
+              "query": [{ "key": "equipoId", "value": "{{equipoLocalId}}" }]
+            }
+          }
+        },
+        {
+          "name": "POST Crear Partido (guarda ID)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res._id) {",
+                  "  pm.collectionVariables.set('partidoId', res._id);",
+                  "  console.log('✅ partidoId guardado:', res._id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"equipoLocal\": \"{{equipoLocalId}}\",\n  \"equipoVisitante\": \"{{equipoVisitanteId}}\",\n  \"fecha\": \"2025-06-15\",\n  \"horario\": \"18:00\",\n  \"lugar\": \"Gimnasio Central UADE\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/partidos", "host": ["{{baseUrl}}"], "path": ["partidos"] }
+          }
+        },
+        {
+          "name": "POST Partido mismo equipo (debe dar error)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"equipoLocal\": \"{{equipoLocalId}}\",\n  \"equipoVisitante\": \"{{equipoLocalId}}\",\n  \"fecha\": \"2025-06-20\",\n  \"horario\": \"19:00\",\n  \"lugar\": \"Cancha Norte\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/partidos", "host": ["{{baseUrl}}"], "path": ["partidos"] }
+          }
+        },
+        {
+          "name": "POST Partido sin campos requeridos (debe dar 400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"equipoLocal\": \"{{equipoLocalId}}\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/partidos", "host": ["{{baseUrl}}"], "path": ["partidos"] }
+          }
+        },
+        {
+          "name": "GET Partido por ID",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/partidos/{{partidoId}}", "host": ["{{baseUrl}}"], "path": ["partidos", "{{partidoId}}"] }
+          }
+        },
+        {
+          "name": "PUT Editar Partido",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"equipoLocal\": \"{{equipoLocalId}}\",\n  \"equipoVisitante\": \"{{equipoVisitanteId}}\",\n  \"fecha\": \"2025-06-22\",\n  \"horario\": \"20:00\",\n  \"lugar\": \"Polideportivo Sur\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/partidos/{{partidoId}}", "host": ["{{baseUrl}}"], "path": ["partidos", "{{partidoId}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🏆 5 - Resultados",
+      "item": [
+        {
+          "name": "PATCH Cargar Resultado (local gana)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"puntosLocal\": 85,\n  \"puntosVisitante\": 72\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/partidos/{{partidoId}}/resultado", "host": ["{{baseUrl}}"], "path": ["partidos", "{{partidoId}}", "resultado"] }
+          }
+        },
+        {
+          "name": "PATCH Resultado empate",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"puntosLocal\": 70,\n  \"puntosVisitante\": 70\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/partidos/{{partidoId}}/resultado", "host": ["{{baseUrl}}"], "path": ["partidos", "{{partidoId}}", "resultado"] }
+          }
+        },
+        {
+          "name": "PATCH Resultado sin campos (debe dar 400)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"puntosLocal\": 90\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/partidos/{{partidoId}}/resultado", "host": ["{{baseUrl}}"], "path": ["partidos", "{{partidoId}}", "resultado"] }
+          }
+        },
+        {
+          "name": "PATCH Resultado sin token (debe dar 401)",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"puntosLocal\": 80,\n  \"puntosVisitante\": 65\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/partidos/{{partidoId}}/resultado", "host": ["{{baseUrl}}"], "path": ["partidos", "{{partidoId}}", "resultado"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "📊 6 - Clasificación",
+      "item": [
+        {
+          "name": "GET Clasificación general (público)",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/clasificacion", "host": ["{{baseUrl}}"], "path": ["clasificacion"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🗑️ 7 - Limpieza (DELETE)",
+      "item": [
+        {
+          "name": "DELETE Partido",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/partidos/{{partidoId}}", "host": ["{{baseUrl}}"], "path": ["partidos", "{{partidoId}}"] }
+          }
+        },
+        {
+          "name": "DELETE Equipo Local",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/equipos/{{equipoLocalId}}", "host": ["{{baseUrl}}"], "path": ["equipos", "{{equipoLocalId}}"] }
+          }
+        },
+        {
+          "name": "DELETE Equipo Visitante",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/equipos/{{equipoVisitanteId}}", "host": ["{{baseUrl}}"], "path": ["equipos", "{{equipoVisitanteId}}"] }
+          }
+        },
+        {
+          "name": "DELETE Equipo sin token (debe dar 401)",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/equipos/{{equipoLocalId}}", "host": ["{{baseUrl}}"], "path": ["equipos", "{{equipoLocalId}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🚫 8 - Rutas inválidas",
+      "item": [
+        {
+          "name": "Ruta inexistente (debe dar 404)",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/ruta-que-no-existe", "host": ["{{baseUrl}}"], "path": ["ruta-que-no-existe"] }
+          }
+        },
+        {
+          "name": "ID con formato inválido (debe dar 400)",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/equipos/esto-no-es-un-objectid", "host": ["{{baseUrl}}"], "path": ["equipos", "esto-no-es-un-objectid"] }
+          }
+        }
+      ]
+    }
+  ]
+}
