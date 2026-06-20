@@ -1,0 +1,138 @@
+.standings {
+  background: var(--color-bg);
+}
+
+.standings__table-wrapper {
+  overflow-x: auto;
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg);
+  background: white;
+  -webkit-overflow-scrolling: touch;
+}
+
+.standings__table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 500px;
+}
+
+.standings__table thead {
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light));
+}
+
+.standings__table th {
+  padding: var(--space-4) var(--space-5);
+  text-align: center;
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  color: white;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.standings__table th:nth-child(2) {
+  text-align: left;
+}
+
+.standings__table td {
+  padding: var(--space-4) var(--space-5);
+  text-align: center;
+  font-size: var(--font-size-sm);
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+}
+
+.standings__table td:nth-child(2) {
+  text-align: left;
+}
+
+.standings__table tbody tr {
+  transition: all var(--transition-fast);
+}
+
+.standings__table tbody tr:hover {
+  background: rgba(30, 58, 138, 0.03);
+}
+
+.standings__table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.standings__row--leader {
+  background: rgba(249, 115, 22, 0.04);
+}
+
+.standings__pos {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-md);
+  font-weight: 700;
+  font-size: var(--font-size-sm);
+}
+
+.standings__pos--1 {
+  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+  color: white;
+}
+
+.standings__pos--2 {
+  background: linear-gradient(135deg, #94a3b8, #64748b);
+  color: white;
+}
+
+.standings__pos--3 {
+  background: linear-gradient(135deg, #d97706, #b45309);
+  color: white;
+}
+
+.standings__pos--4 {
+  background: var(--color-bg);
+  color: var(--color-text-secondary);
+}
+
+.standings__team {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.standings__team-badge {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 800;
+  font-size: var(--font-size-sm);
+  flex-shrink: 0;
+}
+
+.standings__team-name {
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.standings__wins {
+  color: var(--color-success) !important;
+  font-weight: 600;
+}
+
+.standings__losses {
+  color: #ef4444 !important;
+  font-weight: 600;
+}
+
+.standings__table td strong {
+  color: var(--color-text);
+  font-weight: 700;
+}
+
+.standings__action {
+  text-align: center;
+  margin-top: var(--space-8);
+}

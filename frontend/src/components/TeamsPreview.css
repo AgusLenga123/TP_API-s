@@ -1,0 +1,119 @@
+.teams {
+  background: var(--color-bg);
+}
+
+.teams__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-6);
+}
+
+.teams__card {
+  background: white;
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  transition: all var(--transition-base);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--color-border);
+}
+
+.teams__card:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-xl);
+  border-color: transparent;
+}
+
+.teams__card-header {
+  padding: var(--space-6);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+}
+
+.teams__badge {
+  width: 56px;
+  height: 56px;
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 900;
+  font-size: var(--font-size-2xl);
+  backdrop-filter: blur(10px);
+}
+
+.teams__record {
+  background: rgba(255, 255, 255, 0.2);
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-full);
+  color: white;
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  backdrop-filter: blur(10px);
+}
+
+.teams__card-body {
+  padding: var(--space-6);
+}
+
+.teams__name {
+  font-size: var(--font-size-xl);
+  font-weight: 800;
+  color: var(--color-text);
+  margin-bottom: var(--space-4);
+}
+
+.teams__info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-bottom: var(--space-5);
+}
+
+.teams__info-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.teams__info-icon {
+  font-size: var(--font-size-lg);
+}
+
+.teams__info-item div {
+  display: flex;
+  flex-direction: column;
+}
+
+.teams__info-label {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.teams__info-value {
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+  font-weight: 600;
+}
+
+.teams__btn {
+  width: 100%;
+}
+
+@media (min-width: 768px) {
+  .teams__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .teams__grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
