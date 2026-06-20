@@ -2,11 +2,10 @@ import { Link, useLocation } from 'react-router-dom'
 
 const menuItems = [
   { icon: '🏠', label: 'Dashboard', path: '/dashboard' },
-  { icon: '👥', label: 'Equipos', path: '/dashboard/equipos' },
-  { icon: '🧑‍🤝‍🧑', label: 'Jugadores', path: '/dashboard/jugadores' },
-  { icon: '📅', label: 'Partidos', path: '/dashboard/partidos' },
-  { icon: '🏆', label: 'Clasificación', path: '/dashboard/clasificacion' },
-  { icon: '📊', label: 'Resultados', path: '/dashboard/resultados' },
+  { icon: '👥', label: 'Equipos', path: '/admin/equipos' },
+  { icon: '🧑‍🤝‍🧑', label: 'Jugadores', path: '/admin/jugadores' },
+  { icon: '📅', label: 'Partidos', path: '/admin/partidos' },
+  { icon: '📊', label: 'Resultados', path: '/admin/resultados' },
 ]
 
 const Sidebar = ({ isOpen, onClose }) => {

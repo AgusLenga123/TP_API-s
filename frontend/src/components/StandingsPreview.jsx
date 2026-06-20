@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import './StandingsPreview.css'
 
 const standings = [
@@ -64,7 +65,7 @@ const StandingsPreview = () => {
         </div>
 
         <div className="standings__action">
-          <a href="#" className="btn btn-primary" id="btn-clasificacion-completa">Ver Clasificación Completa</a>
+          <Link to="/clasificacion" className="btn btn-primary" id="btn-clasificacion-completa">Ver Clasificación Completa</Link>
         </div>
       </div>
     </section>
