@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import './Navbar.css'
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
+  const location = useLocation()
 
   useEffect(() => {
     const handleScroll = () => {
@@ -25,7 +26,7 @@ const Navbar = () => {
   return (
     <nav className={`navbar ${isScrolled ? 'navbar--scrolled' : ''}`} id="navbar">
       <div className="navbar__container">
-        <a href="#" className="navbar__logo" id="navbar-logo">
+        <Link to="/" className="navbar__logo" id="navbar-logo">
           <div className="navbar__logo-icon">
             <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
               <circle cx="20" cy="20" r="18" fill="#F97316" stroke="#1E3A8A" strokeWidth="2"/>
@@ -36,14 +37,14 @@ const Navbar = () => {
             </svg>
           </div>
           <span className="navbar__logo-text">Youth Basketball League</span>
-        </a>
+        </Link>
 
         <div className={`navbar__menu ${isMenuOpen ? 'navbar__menu--open' : ''}`} id="navbar-menu">
           <div className="navbar__links">
-            <a href="#" className="navbar__link navbar__link--active" onClick={closeMenu}>Inicio</a>
-            <a href="#clasificacion" className="navbar__link" onClick={closeMenu}>Clasificación</a>
-            <a href="#partidos" className="navbar__link" onClick={closeMenu}>Partidos</a>
-            <a href="#equipos" className="navbar__link" onClick={closeMenu}>Equipos</a>
+            <Link to="/" className={`navbar__link ${location.pathname === '/' ? 'navbar__link--active' : ''}`} onClick={closeMenu}>Inicio</Link>
+            <Link to="/clasificacion" className={`navbar__link ${location.pathname === '/clasificacion' ? 'navbar__link--active' : ''}`} onClick={closeMenu}>Clasificación</Link>
+            <Link to="/partidos" className={`navbar__link ${location.pathname === '/partidos' ? 'navbar__link--active' : ''}`} onClick={closeMenu}>Partidos</Link>
+            <Link to="/equipos" className={`navbar__link ${location.pathname === '/equipos' ? 'navbar__link--active' : ''}`} onClick={closeMenu}>Equipos</Link>
           </div>
           <Link to="/login" className="btn btn-secondary navbar__cta" id="btn-login" onClick={closeMenu}>
             Iniciar Sesión

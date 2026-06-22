@@ -19,12 +19,16 @@ const TeamCard = ({ team, onView, onEdit, onDelete }) => {
         <button className="team-card__btn" onClick={() => onView(team)}>
           👁 Ver
         </button>
-        <button className="team-card__btn" onClick={() => onEdit(team)}>
-          ✏ Editar
-        </button>
-        <button className="team-card__btn team-card__btn--delete" onClick={() => onDelete(team)}>
-          🗑 Eliminar
-        </button>
+        {onEdit && (
+          <button className="team-card__btn" onClick={() => onEdit(team)}>
+            ✏ Editar
+          </button>
+        )}
+        {onDelete && (
+          <button className="team-card__btn team-card__btn--delete" onClick={() => onDelete(team)}>
+            🗑 Eliminar
+          </button>
+        )}
       </div>
     </div>
   )

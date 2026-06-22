@@ -23,12 +23,16 @@ const MatchCard = ({ match, onView, onEdit, onDelete }) => {
         <button className="match-card__btn" onClick={() => onView(match)}>
           👁 Ver
         </button>
-        <button className="match-card__btn" onClick={() => onEdit(match)}>
-          ✏ Editar
-        </button>
-        <button className="match-card__btn match-card__btn--delete" onClick={() => onDelete(match)}>
-          🗑 Eliminar
-        </button>
+        {onEdit && (
+          <button className="match-card__btn" onClick={() => onEdit(match)}>
+            ✏ Editar
+          </button>
+        )}
+        {onDelete && (
+          <button className="match-card__btn match-card__btn--delete" onClick={() => onDelete(match)}>
+            🗑 Eliminar
+          </button>
+        )}
       </div>
     </div>
   )

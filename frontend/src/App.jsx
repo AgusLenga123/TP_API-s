@@ -7,15 +7,21 @@ import PlayersPage from './pages/PlayersPage'
 import MatchesPage from './pages/MatchesPage'
 import ResultsPage from './pages/ResultsPage'
 import StandingsPage from './pages/StandingsPage'
+import PublicMatchesPage from './pages/PublicMatchesPage'
+import PublicTeamsPage from './pages/PublicTeamsPage'
+import ConfettiBackground from './components/ConfettiBackground'
 import './App.css'
 
 function App() {
   return (
     <Router>
+      <ConfettiBackground />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/clasificacion" element={<StandingsPage />} />
+        <Route path="/partidos" element={<PublicMatchesPage />} />
+        <Route path="/equipos" element={<PublicTeamsPage />} />
         
         {/* Admin Routes */}
         <Route path="/dashboard" element={<Dashboard />} />

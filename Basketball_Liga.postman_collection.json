@@ -516,6 +516,21 @@
           }
         },
         {
+          "name": "PATCH Resultado (visitante gana)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"puntosLocal\": 68,\n  \"puntosVisitante\": 91\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/partidos/{{partidoId}}/resultado", "host": ["{{baseUrl}}"], "path": ["partidos", "{{partidoId}}", "resultado"] }
+          }
+        },
+        {
           "name": "PATCH Resultado sin campos (debe dar 400)",
           "request": {
             "method": "PATCH",

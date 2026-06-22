@@ -45,12 +45,16 @@ const MatchesTable = ({ matches, onView, onEdit, onDelete }) => {
                   <button className="matches-table__action-btn" onClick={() => onView(match)} title="Ver detalle">
                     👁
                   </button>
-                  <button className="matches-table__action-btn" onClick={() => onEdit(match)} title="Editar">
-                    ✏
-                  </button>
-                  <button className="matches-table__action-btn matches-table__action-btn--delete" onClick={() => onDelete(match)} title="Eliminar">
-                    🗑
-                  </button>
+                  {onEdit && (
+                    <button className="matches-table__action-btn" onClick={() => onEdit(match)} title="Editar">
+                      ✏
+                    </button>
+                  )}
+                  {onDelete && (
+                    <button className="matches-table__action-btn matches-table__action-btn--delete" onClick={() => onDelete(match)} title="Eliminar">
+                      🗑
+                    </button>
+                  )}
                 </div>
               </td>
             </tr>

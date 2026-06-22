@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import './MatchesPreview.css'
 
 const matches = [
@@ -75,7 +76,7 @@ const MatchesPreview = () => {
         </div>
 
         <div className="matches__action">
-          <a href="#" className="btn btn-primary" id="btn-calendario-completo">Ver Calendario Completo</a>
+          <Link to="/partidos" className="btn btn-primary" id="btn-calendario-completo">Ver Calendario Completo</Link>
         </div>
       </div>
     </section>

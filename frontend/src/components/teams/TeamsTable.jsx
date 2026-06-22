@@ -37,12 +37,16 @@ const TeamsTable = ({ teams, onView, onEdit, onDelete }) => {
                   <button className="teams-table__action-btn" onClick={() => onView(team)} title="Ver detalle">
                     👁
                   </button>
-                  <button className="teams-table__action-btn" onClick={() => onEdit(team)} title="Editar">
-                    ✏
-                  </button>
-                  <button className="teams-table__action-btn teams-table__action-btn--delete" onClick={() => onDelete(team)} title="Eliminar">
-                    🗑
-                  </button>
+                  {onEdit && (
+                    <button className="teams-table__action-btn" onClick={() => onEdit(team)} title="Editar">
+                      ✏
+                    </button>
+                  )}
+                  {onDelete && (
+                    <button className="teams-table__action-btn teams-table__action-btn--delete" onClick={() => onDelete(team)} title="Eliminar">
+                      🗑
+                    </button>
+                  )}
                 </div>
               </td>
             </tr>

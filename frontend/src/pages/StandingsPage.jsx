@@ -6,6 +6,7 @@ import StandingsTable from '../components/standings/StandingsTable'
 import StandingsCard from '../components/standings/StandingsCard'
 import TeamStandingDetailModal from '../components/standings/TeamStandingDetailModal'
 import LeagueStats from '../components/standings/LeagueStats'
+import Navbar from '../components/Navbar'
 import '../styles/dashboard.css'
 import '../styles/standings.css'
 
@@ -144,15 +145,10 @@ const StandingsPage = () => {
   // Public Layout
   return (
     <div style={{minHeight: '100vh', background: 'var(--color-bg)'}}>
-      {/* Simple Public Header */}
-      <header style={{background: 'white', borderBottom: '1px solid var(--color-border)', padding: 'var(--space-4) max(var(--space-6), calc((100% - 1200px) / 2))', display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
-        <div style={{display: 'flex', alignItems: 'center', gap: 'var(--space-2)'}}>
-          <div style={{background: 'var(--color-primary)', color: 'white', width: '32px', height: '32px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold'}}>Y</div>
-          <span style={{fontWeight: 800, color: 'var(--color-primary)'}}>Youth Basketball League</span>
-        </div>
-        <a href="/login" className="btn btn-outline" style={{padding: 'var(--space-2) var(--space-4)'}}>Acceso Admin</a>
-      </header>
-      {content}
+      <Navbar />
+      <div style={{paddingTop: '60px'}}>
+        {content}
+      </div>
     </div>
   )
 }
