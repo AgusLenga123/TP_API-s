@@ -9,6 +9,7 @@ import ResultsPage from './pages/ResultsPage'
 import StandingsPage from './pages/StandingsPage'
 import PublicMatchesPage from './pages/PublicMatchesPage'
 import PublicTeamsPage from './pages/PublicTeamsPage'
+import PublicTeamDetailPage from './pages/PublicTeamDetailPage'
 import ConfettiBackground from './components/ConfettiBackground'
 import './App.css'
 
@@ -22,6 +23,7 @@ function App() {
         <Route path="/clasificacion" element={<StandingsPage />} />
         <Route path="/partidos" element={<PublicMatchesPage />} />
         <Route path="/equipos" element={<PublicTeamsPage />} />
+        <Route path="/equipos/:id" element={<PublicTeamDetailPage />} />
         
         {/* Admin Routes */}
         <Route path="/dashboard" element={<Dashboard />} />

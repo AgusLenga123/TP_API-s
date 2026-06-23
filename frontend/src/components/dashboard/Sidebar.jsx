@@ -51,16 +51,6 @@ const Sidebar = ({ isOpen, onClose }) => {
             </Link>
           ))}
 
-          <span className="sidebar__nav-label">Sistema</span>
-          <Link
-            to="/dashboard/configuracion"
-            className={`sidebar__link ${location.pathname === '/dashboard/configuracion' ? 'sidebar__link--active' : ''}`}
-            onClick={onClose}
-            id="sidebar-link-configuracion"
-          >
-            <span className="sidebar__link-icon">⚙️</span>
-            Configuración
-          </Link>
         </nav>
 
         <div className="sidebar__footer">

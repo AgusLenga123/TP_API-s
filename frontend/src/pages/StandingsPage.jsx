@@ -1,50 +1,60 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import StandingsSummary from '../components/standings/StandingsSummary'
 import TopTeams from '../components/standings/TopTeams'
 import StandingsSearchBar from '../components/standings/StandingsSearchBar'
 import StandingsTable from '../components/standings/StandingsTable'
 import StandingsCard from '../components/standings/StandingsCard'
-import TeamStandingDetailModal from '../components/standings/TeamStandingDetailModal'
 import LeagueStats from '../components/standings/LeagueStats'
 import Navbar from '../components/Navbar'
 import '../styles/dashboard.css'
 import '../styles/standings.css'
 
-// Initial mock data
-const initialStandings = [
-  { position: 1, team: "Hawks", points: 18, played: 8, wins: 6, draws: 0, losses: 2, pointsFor: 620, pointsAgainst: 560, difference: 60 },
-  { position: 2, team: "Tigers", points: 16, played: 8, wins: 5, draws: 1, losses: 2, pointsFor: 590, pointsAgainst: 540, difference: 50 },
-  { position: 3, team: "Lions", points: 15, played: 8, wins: 5, draws: 0, losses: 3, pointsFor: 580, pointsAgainst: 560, difference: 20 },
-  { position: 4, team: "Eagles", points: 12, played: 8, wins: 4, draws: 0, losses: 4, pointsFor: 540, pointsAgainst: 550, difference: -10 },
-  { position: 5, team: "Bears", points: 10, played: 8, wins: 3, draws: 1, losses: 4, pointsFor: 510, pointsAgainst: 530, difference: -20 },
-  { position: 6, team: "Wolves", points: 9, played: 8, wins: 3, draws: 0, losses: 5, pointsFor: 490, pointsAgainst: 540, difference: -50 },
-  { position: 7, team: "Sharks", points: 6, played: 8, wins: 2, draws: 0, losses: 6, pointsFor: 460, pointsAgainst: 570, difference: -110 },
-  { position: 8, team: "Panthers", points: 3, played: 8, wins: 1, draws: 0, losses: 7, pointsFor: 440, pointsAgainst: 590, difference: -150 },
-]
+
 
 const StandingsPage = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [standings, setStandings] = useState([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+  const navigate = useNavigate()
   
   // Search and Filter states
   const [searchTerm, setSearchTerm] = useState('')
   const [filter, setFilter] = useState('Todos')
-  
-  // Modal state
-  const [isDetailOpen, setIsDetailOpen] = useState(false)
-  const [selectedTeam, setSelectedTeam] = useState(null)
 
   useEffect(() => {
     const fetchStandings = async () => {
-      setLoading(true)
-      await new Promise(resolve => setTimeout(resolve, 800))
-      // Sort to ensure correct positioning
-      const sorted = [...initialStandings].sort((a, b) => b.points - a.points || b.difference - a.difference)
-      // Re-assign positions just in case
-      sorted.forEach((team, index) => { team.position = index + 1 })
-      setStandings(sorted)
-      setLoading(false)
+      try {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/clasificacion`)
+        if (!response.ok) throw new Error('Error al cargar la clasificación')
+        const data = await response.json()
+        
+        // Map API keys to the keys expected by the components
+        const mappedData = data.map((t) => ({
+          id: t.equipoId,
+          position: t.posicion,
+          team: t.nombre,
+          points: t.puntos,
+          played: t.partidosJugados,
+          wins: t.partidosGanados,
+          draws: t.partidosEmpatados,
+          losses: t.partidosPerdidos,
+          pointsFor: t.tantosAFavor,
+          pointsAgainst: t.tantosEnContra,
+          difference: t.diferenciaDeTantos
+        }))
+
+        // Ensure correct sorting just in case
+        mappedData.sort((a, b) => b.points - a.points || b.difference - a.difference)
+        mappedData.forEach((team, index) => { team.position = index + 1 })
+        
+        setStandings(mappedData)
+      } catch (err) {
+        setError(err.message)
+      } finally {
+        setLoading(false)
+      }
     }
     fetchStandings()
   }, [])
@@ -67,8 +77,8 @@ const StandingsPage = () => {
   // Handlers
 
   const handleOpenDetail = (team) => {
-    setSelectedTeam(team)
-    setIsDetailOpen(true)
+    // team obj now has `id` from the mapped data
+    navigate(`/equipos/${team.id}`)
   }
 
   const content = (
@@ -90,6 +100,12 @@ const StandingsPage = () => {
           </div>
           <div className="skeleton skeleton-row" style={{height: '250px', marginBottom: '24px'}}></div>
           <div className="skeleton skeleton-row" style={{height: '400px'}}></div>
+        </div>
+      ) : error ? (
+        <div className="empty-state">
+          <span className="empty-state__icon">⚠️</span>
+          <h3 className="empty-state__title">No se pudo cargar la clasificación</h3>
+          <p className="empty-state__desc">{error}</p>
         </div>
       ) : (
         <>
@@ -133,12 +149,6 @@ const StandingsPage = () => {
         </>
       )}
 
-      {/* Detail Modal */}
-      <TeamStandingDetailModal 
-        isOpen={isDetailOpen} 
-        onClose={() => setIsDetailOpen(false)} 
-        team={selectedTeam} 
-      />
     </div>
   )
 

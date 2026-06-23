@@ -5,7 +5,7 @@ const PlayerFormModal = ({ isOpen, onClose, onSave, player, teamsList }) => {
     firstName: '',
     lastName: '',
     category: '',
-    team: '',
+    teamId: '',
     status: 'Activo',
   })
   const [errors, setErrors] = useState({})
@@ -16,7 +16,7 @@ const PlayerFormModal = ({ isOpen, onClose, onSave, player, teamsList }) => {
         firstName: player.firstName,
         lastName: player.lastName,
         category: player.category,
-        team: player.team,
+        teamId: player.teamId,
         status: player.status,
       })
     } else {
@@ -24,7 +24,7 @@ const PlayerFormModal = ({ isOpen, onClose, onSave, player, teamsList }) => {
         firstName: '',
         lastName: '',
         category: '',
-        team: '',
+        teamId: '',
         status: 'Activo',
       })
     }
@@ -38,7 +38,7 @@ const PlayerFormModal = ({ isOpen, onClose, onSave, player, teamsList }) => {
     if (!formData.firstName.trim()) newErrors.firstName = 'El nombre es obligatorio'
     if (!formData.lastName.trim()) newErrors.lastName = 'El apellido es obligatorio'
     if (!formData.category) newErrors.category = 'La categoría es obligatoria'
-    if (!formData.team) newErrors.team = 'El equipo es obligatorio'
+    if (!formData.teamId) newErrors.teamId = 'El equipo es obligatorio'
     return newErrors
   }
 
@@ -113,15 +113,15 @@ const PlayerFormModal = ({ isOpen, onClose, onSave, player, teamsList }) => {
               <label className="form-label">Equipo</label>
               <select
                 className="form-select"
-                value={formData.team}
-                onChange={(e) => setFormData({ ...formData, team: e.target.value })}
+                value={formData.teamId}
+                onChange={(e) => setFormData({ ...formData, teamId: e.target.value })}
               >
                 <option value="">Seleccionar equipo...</option>
-                {teamsList.map((team, idx) => (
-                  <option key={idx} value={team}>{team}</option>
+                {teamsList.map((t) => (
+                  <option key={t.id} value={t.id}>{t.name}</option>
                 ))}
               </select>
-              {errors.team && <span className="form-error">{errors.team}</span>}
+              {errors.teamId && <span className="form-error">{errors.teamId}</span>}
             </div>
 
             <div className="form-group">

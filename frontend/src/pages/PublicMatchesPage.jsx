@@ -7,24 +7,11 @@ import MatchDetailModal from '../components/matches/MatchDetailModal'
 import Navbar from '../components/Navbar'
 import '../styles/matches.css'
 
-// Mock data (8-10 matches)
-const mockMatches = [
-  { id: 1, homeTeam: "Hawks", awayTeam: "Tigers", date: "2026-06-22", time: "18:00", location: "Estadio Central", status: "Pendiente" },
-  { id: 2, homeTeam: "Lions", awayTeam: "Eagles", date: "2026-06-23", time: "20:00", location: "Polideportivo Norte", status: "Pendiente" },
-  { id: 3, homeTeam: "Tigers", awayTeam: "Lions", date: "2026-06-15", time: "19:30", location: "Estadio Central", status: "Finalizado" },
-  { id: 4, homeTeam: "Eagles", awayTeam: "Hawks", date: "2026-06-18", time: "17:00", location: "Arena Sur", status: "Finalizado" },
-  { id: 5, homeTeam: "Bears", awayTeam: "Wolves", date: "2026-06-25", time: "18:30", location: "Cancha Municipal", status: "Pendiente" },
-  { id: 6, homeTeam: "Sharks", awayTeam: "Panthers", date: "2026-06-26", time: "19:00", location: "Centro Deportivo", status: "Pendiente" },
-  { id: 7, homeTeam: "Wolves", awayTeam: "Sharks", date: "2026-06-10", time: "20:30", location: "Cancha Municipal", status: "Finalizado" },
-  { id: 8, homeTeam: "Panthers", awayTeam: "Bears", date: "2026-06-12", time: "18:00", location: "Arena Sur", status: "Finalizado" },
-  { id: 9, homeTeam: "Hawks", awayTeam: "Lions", date: "2026-06-30", time: "21:00", location: "Estadio Central", status: "Pendiente" },
-]
-
-const mockTeamsList = ["Hawks", "Tigers", "Lions", "Eagles", "Bears", "Wolves", "Sharks", "Panthers"]
-
 const PublicMatchesPage = () => {
   const [matches, setMatches] = useState([])
+  const [teamsList, setTeamsList] = useState([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
   
   // Search and Filter states
   const [searchTerm, setSearchTerm] = useState('')
@@ -36,16 +23,40 @@ const PublicMatchesPage = () => {
   const [isDetailOpen, setIsDetailOpen] = useState(false)
   const [selectedMatch, setSelectedMatch] = useState(null)
 
-  // Simulate initial data loading
   useEffect(() => {
     const fetchMatches = async () => {
-      setLoading(true)
-      // Simulate network delay
-      await new Promise(resolve => setTimeout(resolve, 800))
-      // Sort matches by date ascending
-      const sorted = [...mockMatches].sort((a, b) => new Date(a.date) - new Date(b.date))
-      setMatches(sorted)
-      setLoading(false)
+      try {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/partidos`)
+        if (!response.ok) throw new Error('Error al cargar los partidos')
+        const data = await response.json()
+        
+        const mappedData = data.map(m => ({
+          id: m._id,
+          homeTeam: m.equipoLocal.nombre,
+          awayTeam: m.equipoVisitante.nombre,
+          date: m.fecha.split('T')[0], // YYYY-MM-DD
+          time: m.horario,
+          location: m.lugar,
+          status: m.finalizado ? 'Finalizado' : 'Pendiente',
+          resultado: m.resultado
+        }))
+        
+        mappedData.sort((a, b) => new Date(a.date) - new Date(b.date))
+        setMatches(mappedData)
+        
+        // Extract unique teams for the filter dropdown
+        const teams = new Set()
+        mappedData.forEach(m => {
+          teams.add(m.homeTeam)
+          teams.add(m.awayTeam)
+        })
+        setTeamsList(Array.from(teams).sort())
+        
+      } catch (err) {
+        setError(err.message)
+      } finally {
+        setLoading(false)
+      }
     }
     fetchMatches()
   }, [])
@@ -87,6 +98,12 @@ const PublicMatchesPage = () => {
           <div className="skeleton skeleton-row" style={{height: '60px', marginBottom: '24px'}}></div>
           <div className="skeleton skeleton-row" style={{height: '400px'}}></div>
         </div>
+      ) : error ? (
+        <div className="empty-state">
+          <span className="empty-state__icon">⚠️</span>
+          <h3 className="empty-state__title">No se pudieron cargar los partidos</h3>
+          <p className="empty-state__desc">{error}</p>
+        </div>
       ) : (
         <>
           <MatchesSearchBar 
@@ -98,7 +115,7 @@ const PublicMatchesPage = () => {
             onTeamFilterChange={setTeamFilter}
             dateFilter={dateFilter}
             onDateFilterChange={setDateFilter}
-            teamsList={mockTeamsList}
+            teamsList={teamsList}
           />
 
           <MatchesTable 

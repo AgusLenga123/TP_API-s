@@ -11,21 +11,12 @@ import DeletePlayerModal from '../components/players/DeletePlayerModal'
 import '../styles/dashboard.css'
 import '../styles/players.css'
 
-// Initial mock data
-const initialPlayers = [
-  { id: 1, firstName: "Lucas", lastName: "Pérez", category: "Sub 17", team: "Hawks", status: "Activo" },
-  { id: 2, firstName: "Martín", lastName: "Gómez", category: "Sub 19", team: "Tigers", status: "Activo" },
-  { id: 3, firstName: "Juan", lastName: "Silva", category: "Sub 15", team: "Lions", status: "Activo" },
-  { id: 4, firstName: "Mateo", lastName: "Rodríguez", category: "Sub 17", team: "Eagles", status: "Inactivo" },
-  { id: 5, firstName: "Tomás", lastName: "Martínez", category: "Sub 19", team: "Hawks", status: "Activo" },
-  { id: 6, firstName: "Nicolás", lastName: "Fernández", category: "Sub 15", team: "Tigers", status: "Activo" },
-]
-
-const mockTeamsList = ["Hawks", "Tigers", "Lions", "Eagles"]
+// API integrated, no mock data needed
 
 const PlayersPage = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [players, setPlayers] = useState([])
+  const [teamsList, setTeamsList] = useState([])
   const [loading, setLoading] = useState(true)
   
   // Search and Filter states
@@ -39,16 +30,37 @@ const PlayersPage = () => {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false)
   const [selectedPlayer, setSelectedPlayer] = useState(null)
 
-  // Simulate initial data loading
   useEffect(() => {
-    const fetchPlayers = async () => {
-      setLoading(true)
-      // Simulate network delay
-      await new Promise(resolve => setTimeout(resolve, 800))
-      setPlayers(initialPlayers)
-      setLoading(false)
+    const fetchData = async () => {
+      try {
+        const headers = { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+        const [jugadoresRes, equiposRes] = await Promise.all([
+          fetch(`${import.meta.env.VITE_API_URL}/jugadores`, { headers }),
+          fetch(`${import.meta.env.VITE_API_URL}/equipos`, { headers })
+        ])
+        if (!jugadoresRes.ok || !equiposRes.ok) throw new Error('Error al cargar datos')
+        
+        const jugadores = await jugadoresRes.json()
+        const equipos = await equiposRes.json()
+
+        setTeamsList(equipos.map(e => ({ id: e._id, name: e.nombre })))
+        
+        setPlayers(jugadores.map(p => ({
+          id: p._id,
+          firstName: p.nombre,
+          lastName: p.apellido,
+          category: p.categoria,
+          team: p.equipo?.nombre || 'Sin Equipo',
+          teamId: p.equipo?._id || '',
+          status: 'Activo'
+        })))
+      } catch (err) {
+        console.error(err)
+      } finally {
+        setLoading(false)
+      }
     }
-    fetchPlayers()
+    fetchData()
   }, [])
 
   // Derived state: Filtered players
@@ -81,17 +93,54 @@ const PlayersPage = () => {
     setIsFormOpen(true)
   }
 
-  const handleSavePlayer = (playerData) => {
-    if (selectedPlayer) {
-      // Edit existing
-      setPlayers(players.map(p => p.id === playerData.id ? playerData : p))
-    } else {
-      // Create new
-      const newPlayer = { ...playerData, id: Date.now() }
-      setPlayers([...players, newPlayer])
+  const handleSavePlayer = async (playerData) => {
+    try {
+      const headers = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      }
+      const body = JSON.stringify({ 
+        nombre: playerData.firstName, 
+        apellido: playerData.lastName,
+        categoria: playerData.category,
+        equipo: playerData.teamId
+      })
+      
+      if (selectedPlayer) {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/jugadores/${playerData.id}`, {
+          method: 'PUT', headers, body
+        })
+        if (!res.ok) throw new Error('Error al actualizar')
+        const updated = await res.json()
+        setPlayers(players.map(p => p.id === updated._id ? { 
+          ...p, 
+          firstName: updated.nombre, 
+          lastName: updated.apellido, 
+          category: updated.categoria,
+          team: updated.equipo?.nombre || 'Sin Equipo',
+          teamId: updated.equipo?._id || ''
+        } : p))
+      } else {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/jugadores`, {
+          method: 'POST', headers, body
+        })
+        if (!res.ok) throw new Error('Error al crear')
+        const created = await res.json()
+        setPlayers([...players, { 
+          id: created._id, 
+          firstName: created.nombre, 
+          lastName: created.apellido, 
+          category: created.categoria,
+          team: created.equipo?.nombre || teamsList.find(t => t.id === created.equipo)?.name || 'Sin Equipo',
+          teamId: created.equipo?._id || created.equipo || '',
+          status: 'Activo' 
+        }])
+      }
+      setIsFormOpen(false)
+      setSelectedPlayer(null)
+    } catch (err) {
+      alert(err.message)
     }
-    setIsFormOpen(false)
-    setSelectedPlayer(null)
   }
 
   const handleOpenDetail = (player) => {
@@ -104,10 +153,19 @@ const PlayersPage = () => {
     setIsDeleteOpen(true)
   }
 
-  const handleDeletePlayer = (id) => {
-    setPlayers(players.filter(p => p.id !== id))
-    setIsDeleteOpen(false)
-    setSelectedPlayer(null)
+  const handleDeletePlayer = async (id) => {
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/jugadores/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+      })
+      if (!res.ok) throw new Error('Error al eliminar')
+      setPlayers(players.filter(p => p.id !== id))
+      setIsDeleteOpen(false)
+      setSelectedPlayer(null)
+    } catch (err) {
+      alert(err.message)
+    }
   }
 
   return (
@@ -149,7 +207,7 @@ const PlayersPage = () => {
                 onCategoryFilterChange={setCategoryFilter}
                 teamFilter={teamFilter}
                 onTeamFilterChange={setTeamFilter}
-                teamsList={mockTeamsList}
+                teamsList={teamsList.map(t => t.name)}
               />
 
               <PlayersTable 
@@ -188,7 +246,7 @@ const PlayersPage = () => {
         onClose={() => setIsFormOpen(false)} 
         onSave={handleSavePlayer} 
         player={selectedPlayer}
-        teamsList={mockTeamsList}
+        teamsList={teamsList}
       />
       
       <PlayerDetailModal 

@@ -8,24 +8,32 @@ const Login = () => {
   const [serverError, setServerError] = useState('')
   const navigate = useNavigate()
 
-  // Mock login handler — replace with real API call later
   const handleLogin = async ({ username, password }) => {
     setServerError('')
     setIsLoading(true)
 
     try {
-      // Simulate API call delay
-      await new Promise((resolve) => setTimeout(resolve, 1500))
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ usuario: username, password })
+      })
 
-      // Mock validation — replace with real endpoint
-      if (username === 'admin' && password === 'admin123') {
-        // TODO: Save token
-        navigate('/dashboard')
-      } else {
-        setServerError('Usuario o contraseña incorrectos')
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.mensaje || 'Usuario o contraseña incorrectos')
       }
-    } catch {
-      setServerError('Error de conexión. Intentá nuevamente.')
+
+      const data = await response.json()
+      // Guardamos el token para autenticar las llamadas a las rutas protegidas
+      localStorage.setItem('token', data.token)
+      localStorage.setItem('adminUser', JSON.stringify(data.usuario))
+      
+      navigate('/dashboard')
+    } catch (err) {
+      setServerError(err.message || 'Error de conexión. Intentá nuevamente.')
     } finally {
       setIsLoading(false)
     }

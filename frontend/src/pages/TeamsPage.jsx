@@ -11,13 +11,7 @@ import DeleteTeamModal from '../components/teams/DeleteTeamModal'
 import '../styles/dashboard.css'
 import '../styles/teams.css'
 
-// Initial mock data
-const initialTeams = [
-  { id: 1, name: "Hawks", coach: "John Smith", players: 12, status: "Activo" },
-  { id: 2, name: "Tigers", coach: "Michael Brown", players: 11, status: "Activo" },
-  { id: 3, name: "Lions", coach: "David Wilson", players: 13, status: "Activo" },
-  { id: 4, name: "Eagles", coach: "Robert Davis", players: 12, status: "Inactivo" },
-]
+// API integrated, no mock data needed
 
 const TeamsPage = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -34,14 +28,24 @@ const TeamsPage = () => {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false)
   const [selectedTeam, setSelectedTeam] = useState(null)
 
-  // Simulate initial data loading
   useEffect(() => {
     const fetchTeams = async () => {
-      setLoading(true)
-      // Simulate network delay
-      await new Promise(resolve => setTimeout(resolve, 800))
-      setTeams(initialTeams)
-      setLoading(false)
+      try {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/equipos`)
+        if (!res.ok) throw new Error('Error al cargar equipos')
+        const data = await res.json()
+        setTeams(data.map(t => ({
+          id: t._id,
+          name: t.nombre,
+          coach: t.entrenador || 'N/A',
+          players: t.jugadores ? t.jugadores.length : 0,
+          status: 'Activo'
+        })))
+      } catch (err) {
+        console.error(err)
+      } finally {
+        setLoading(false)
+      }
     }
     fetchTeams()
   }, [])
@@ -70,17 +74,34 @@ const TeamsPage = () => {
     setIsFormOpen(true)
   }
 
-  const handleSaveTeam = (teamData) => {
-    if (selectedTeam) {
-      // Edit existing
-      setTeams(teams.map(t => t.id === teamData.id ? teamData : t))
-    } else {
-      // Create new
-      const newTeam = { ...teamData, id: Date.now() }
-      setTeams([...teams, newTeam])
+  const handleSaveTeam = async (teamData) => {
+    try {
+      const headers = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      }
+      const body = JSON.stringify({ nombre: teamData.name, entrenador: teamData.coach })
+      
+      if (selectedTeam) {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/equipos/${teamData.id}`, {
+          method: 'PUT', headers, body
+        })
+        if (!res.ok) throw new Error('Error al actualizar el equipo')
+        const updated = await res.json()
+        setTeams(teams.map(t => t.id === updated._id ? { ...t, name: updated.nombre, coach: updated.entrenador || 'N/A' } : t))
+      } else {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/equipos`, {
+          method: 'POST', headers, body
+        })
+        if (!res.ok) throw new Error('Error al crear el equipo')
+        const created = await res.json()
+        setTeams([...teams, { id: created._id, name: created.nombre, coach: created.entrenador || 'N/A', players: 0, status: 'Activo' }])
+      }
+      setIsFormOpen(false)
+      setSelectedTeam(null)
+    } catch (err) {
+      alert(err.message)
     }
-    setIsFormOpen(false)
-    setSelectedTeam(null)
   }
 
   const handleOpenDetail = (team) => {
@@ -93,10 +114,19 @@ const TeamsPage = () => {
     setIsDeleteOpen(true)
   }
 
-  const handleDeleteTeam = (id) => {
-    setTeams(teams.filter(t => t.id !== id))
-    setIsDeleteOpen(false)
-    setSelectedTeam(null)
+  const handleDeleteTeam = async (id) => {
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/equipos/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+      })
+      if (!res.ok) throw new Error('Error al eliminar el equipo')
+      setTeams(teams.filter(t => t.id !== id))
+      setIsDeleteOpen(false)
+      setSelectedTeam(null)
+    } catch (err) {
+      alert(err.message)
+    }
   }
 
   return (

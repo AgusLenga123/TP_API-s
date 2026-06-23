@@ -1,35 +1,14 @@
-const stats = [
-  {
-    icon: '👥',
-    label: 'Equipos',
-    value: 8,
-    color: 'blue',
-  },
-  {
-    icon: '🏃',
-    label: 'Jugadores',
-    value: 96,
-    color: 'orange',
-  },
-  {
-    icon: '📅',
-    label: 'Partidos Programados',
-    value: 24,
-    color: 'green',
-  },
-  {
-    icon: '✅',
-    label: 'Partidos Finalizados',
-    value: 18,
-    color: 'purple',
-  },
-]
-
-const StatsCards = () => {
+const StatsCards = ({ stats }) => {
+  const statCards = [
+    { icon: '👥', label: 'Equipos', value: stats.teams, color: 'blue' },
+    { icon: '🏃', label: 'Jugadores', value: stats.players, color: 'orange' },
+    { icon: '📅', label: 'Partidos Programados', value: stats.matchesScheduled, color: 'green' },
+    { icon: '✅', label: 'Partidos Finalizados', value: stats.matchesFinished, color: 'purple' },
+  ]
   return (
     <section className="stats" id="stats-section">
       <div className="stats__grid">
-        {stats.map((stat, index) => (
+        {statCards.map((stat, index) => (
           <div
             className={`stats__card stats__card--${stat.color}`}
             key={index}

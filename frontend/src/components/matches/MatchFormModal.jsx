@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react'
 
 const MatchFormModal = ({ isOpen, onClose, onSave, match, teamsList }) => {
   const [formData, setFormData] = useState({
-    homeTeam: '',
-    awayTeam: '',
+    homeTeamId: '',
+    awayTeamId: '',
     date: '',
     time: '',
     location: '',
@@ -14,8 +14,8 @@ const MatchFormModal = ({ isOpen, onClose, onSave, match, teamsList }) => {
   useEffect(() => {
     if (match) {
       setFormData({
-        homeTeam: match.homeTeam,
-        awayTeam: match.awayTeam,
+        homeTeamId: match.homeTeamId,
+        awayTeamId: match.awayTeamId,
         date: match.date,
         time: match.time,
         location: match.location,
@@ -23,8 +23,8 @@ const MatchFormModal = ({ isOpen, onClose, onSave, match, teamsList }) => {
       })
     } else {
       setFormData({
-        homeTeam: '',
-        awayTeam: '',
+        homeTeamId: '',
+        awayTeamId: '',
         date: '',
         time: '',
         location: '',
@@ -38,10 +38,10 @@ const MatchFormModal = ({ isOpen, onClose, onSave, match, teamsList }) => {
 
   const validate = () => {
     const newErrors = {}
-    if (!formData.homeTeam) newErrors.homeTeam = 'El equipo local es obligatorio'
-    if (!formData.awayTeam) newErrors.awayTeam = 'El equipo visitante es obligatorio'
-    if (formData.homeTeam && formData.awayTeam && formData.homeTeam === formData.awayTeam) {
-      newErrors.awayTeam = 'El equipo visitante no puede ser el mismo que el local'
+    if (!formData.homeTeamId) newErrors.homeTeamId = 'El equipo local es obligatorio'
+    if (!formData.awayTeamId) newErrors.awayTeamId = 'El equipo visitante es obligatorio'
+    if (formData.homeTeamId && formData.awayTeamId && formData.homeTeamId === formData.awayTeamId) {
+      newErrors.awayTeamId = 'El equipo visitante no puede ser el mismo que el local'
     }
     if (!formData.date) newErrors.date = 'La fecha es obligatoria'
     if (!formData.time) newErrors.time = 'La hora es obligatoria'
@@ -82,30 +82,30 @@ const MatchFormModal = ({ isOpen, onClose, onSave, match, teamsList }) => {
                 <label className="form-label">Equipo Local</label>
                 <select
                   className="form-select"
-                  value={formData.homeTeam}
-                  onChange={(e) => setFormData({ ...formData, homeTeam: e.target.value })}
+                  value={formData.homeTeamId}
+                  onChange={(e) => setFormData({ ...formData, homeTeamId: e.target.value })}
                 >
                   <option value="">Seleccionar local...</option>
-                  {teamsList.map((team, idx) => (
-                    <option key={idx} value={team}>{team}</option>
+                  {teamsList.map((t) => (
+                    <option key={t.id} value={t.id}>{t.name}</option>
                   ))}
                 </select>
-                {errors.homeTeam && <span className="form-error">{errors.homeTeam}</span>}
+                {errors.homeTeamId && <span className="form-error">{errors.homeTeamId}</span>}
               </div>
 
               <div className="form-group">
                 <label className="form-label">Equipo Visitante</label>
                 <select
                   className="form-select"
-                  value={formData.awayTeam}
-                  onChange={(e) => setFormData({ ...formData, awayTeam: e.target.value })}
+                  value={formData.awayTeamId}
+                  onChange={(e) => setFormData({ ...formData, awayTeamId: e.target.value })}
                 >
                   <option value="">Seleccionar visitante...</option>
-                  {teamsList.map((team, idx) => (
-                    <option key={idx} value={team}>{team}</option>
+                  {teamsList.map((t) => (
+                    <option key={t.id} value={t.id}>{t.name}</option>
                   ))}
                 </select>
-                {errors.awayTeam && <span className="form-error">{errors.awayTeam}</span>}
+                {errors.awayTeamId && <span className="form-error">{errors.awayTeamId}</span>}
               </div>
             </div>
 

@@ -1,38 +1,57 @@
 import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import SearchBar from '../components/teams/SearchBar'
-import TeamDetailModal from '../components/teams/TeamDetailModal'
 import Navbar from '../components/Navbar'
 import '../styles/teams.css'
 import '../components/TeamsPreview.css'
 
-const mockTeams = [
-  { id: 1, name: 'Hawks', coach: 'John Smith', players: 12, color: '#e74c3c', record: '8-2', status: 'Activo' },
-  { id: 2, name: 'Tigers', coach: 'Maria García', players: 11, color: '#f39c12', record: '7-3', status: 'Activo' },
-  { id: 3, name: 'Lions', coach: 'Carlos López', players: 13, color: '#27ae60', record: '6-4', status: 'Activo' },
-  { id: 4, name: 'Eagles', coach: 'Ana Martínez', players: 12, color: '#3498db', record: '5-5', status: 'Activo' },
-  { id: 5, name: 'Wolves', coach: 'Roberto Díaz', players: 11, color: '#8e44ad', record: '4-6', status: 'Activo' },
-  { id: 6, name: 'Bears', coach: 'Laura Sánchez', players: 12, color: '#2c3e50', record: '3-7', status: 'Activo' },
-]
+const getTeamColor = (teamName) => {
+  const colors = {
+    Hawks: '#e74c3c',
+    Tigers: '#f39c12',
+    Lions: '#27ae60',
+    Eagles: '#3498db',
+    Bears: '#2c3e50',
+    Wolves: '#8e44ad',
+    Sharks: '#16a085',
+    Panthers: '#2c3e50',
+  }
+  return colors[teamName] || '#1E3A8A' // default color
+}
 
 const PublicTeamsPage = () => {
   const [teams, setTeams] = useState([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
   
   // Search and Filter states
   const [searchTerm, setSearchTerm] = useState('')
   const [filter, setFilter] = useState('Todos')
   
-  // Modal states
-  const [isDetailOpen, setIsDetailOpen] = useState(false)
-  const [selectedTeam, setSelectedTeam] = useState(null)
+  const navigate = useNavigate()
 
   useEffect(() => {
     const fetchTeams = async () => {
-      setLoading(true)
-      await new Promise(resolve => setTimeout(resolve, 800))
-      setTeams(mockTeams)
-      setLoading(false)
+      try {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/equipos`)
+        if (!response.ok) throw new Error('Error al cargar los equipos')
+        const data = await response.json()
+        
+        const mappedData = data.map(team => ({
+          id: team._id,
+          name: team.nombre,
+          coach: team.entrenador || 'N/A',
+          players: team.jugadores ? team.jugadores.length : 0,
+          color: getTeamColor(team.nombre),
+          record: `${team.estadisticas.partidosGanados}-${team.estadisticas.partidosPerdidos}`,
+          status: 'Activo' // Or map from backend if available
+        }))
+        setTeams(mappedData)
+      } catch (err) {
+        setError(err.message)
+      } finally {
+        setLoading(false)
+      }
     }
     fetchTeams()
   }, [])
@@ -45,8 +64,7 @@ const PublicTeamsPage = () => {
   })
 
   const handleOpenDetail = (team) => {
-    setSelectedTeam(team)
-    setIsDetailOpen(true)
+    navigate(`/equipos/${team.id}`)
   }
 
   const content = (
@@ -67,6 +85,12 @@ const PublicTeamsPage = () => {
           </div>
           <div className="skeleton skeleton-row" style={{height: '60px', marginBottom: '24px'}}></div>
           <div className="skeleton skeleton-row" style={{height: '400px'}}></div>
+        </div>
+      ) : error ? (
+        <div className="empty-state">
+          <span className="empty-state__icon">⚠️</span>
+          <h3 className="empty-state__title">No se pudieron cargar los equipos</h3>
+          <p className="empty-state__desc">{error}</p>
         </div>
       ) : (
         <>
@@ -123,11 +147,6 @@ const PublicTeamsPage = () => {
         </>
       )}
 
-      <TeamDetailModal 
-        isOpen={isDetailOpen} 
-        onClose={() => setIsDetailOpen(false)} 
-        team={selectedTeam} 
-      />
     </div>
   )
 

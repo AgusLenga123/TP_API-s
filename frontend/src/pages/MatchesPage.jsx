@@ -11,19 +11,12 @@ import DeleteMatchModal from '../components/matches/DeleteMatchModal'
 import '../styles/dashboard.css'
 import '../styles/matches.css'
 
-// Initial mock data
-const initialMatches = [
-  { id: 1, homeTeam: "Hawks", awayTeam: "Tigers", date: "2026-06-22", time: "18:00", location: "Estadio Central", status: "Pendiente" },
-  { id: 2, homeTeam: "Lions", awayTeam: "Eagles", date: "2026-06-23", time: "20:00", location: "Polideportivo Norte", status: "Pendiente" },
-  { id: 3, homeTeam: "Tigers", awayTeam: "Lions", date: "2026-06-15", time: "19:30", location: "Estadio Central", status: "Finalizado" },
-  { id: 4, homeTeam: "Eagles", awayTeam: "Hawks", date: "2026-06-18", time: "17:00", location: "Arena Sur", status: "Finalizado" },
-]
-
-const mockTeamsList = ["Hawks", "Tigers", "Lions", "Eagles"]
+// API integrated, no mock data needed
 
 const MatchesPage = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [matches, setMatches] = useState([])
+  const [teamsList, setTeamsList] = useState([])
   const [loading, setLoading] = useState(true)
   
   // Search and Filter states
@@ -38,18 +31,41 @@ const MatchesPage = () => {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false)
   const [selectedMatch, setSelectedMatch] = useState(null)
 
-  // Simulate initial data loading
   useEffect(() => {
-    const fetchMatches = async () => {
-      setLoading(true)
-      // Simulate network delay
-      await new Promise(resolve => setTimeout(resolve, 800))
-      // Sort matches by date ascending
-      const sorted = [...initialMatches].sort((a, b) => new Date(a.date) - new Date(b.date))
-      setMatches(sorted)
-      setLoading(false)
+    const fetchData = async () => {
+      try {
+        const headers = { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+        const [partidosRes, equiposRes] = await Promise.all([
+          fetch(`${import.meta.env.VITE_API_URL}/partidos`, { headers }),
+          fetch(`${import.meta.env.VITE_API_URL}/equipos`, { headers })
+        ])
+        if (!partidosRes.ok || !equiposRes.ok) throw new Error('Error al cargar datos')
+        
+        const partidos = await partidosRes.json()
+        const equipos = await equiposRes.json()
+
+        setTeamsList(equipos.map(e => ({ id: e._id, name: e.nombre })))
+        
+        const mappedData = partidos.map(m => ({
+          id: m._id,
+          homeTeam: m.equipoLocal?.nombre || 'Local',
+          homeTeamId: m.equipoLocal?._id || '',
+          awayTeam: m.equipoVisitante?.nombre || 'Visitante',
+          awayTeamId: m.equipoVisitante?._id || '',
+          date: m.fecha.split('T')[0],
+          time: m.horario,
+          location: m.lugar,
+          status: m.finalizado ? 'Finalizado' : 'Pendiente',
+        }))
+        
+        setMatches(mappedData.sort((a, b) => new Date(a.date) - new Date(b.date)))
+      } catch (err) {
+        console.error(err)
+      } finally {
+        setLoading(false)
+      }
     }
-    fetchMatches()
+    fetchData()
   }, [])
 
   // Derived state: Filtered matches
@@ -86,18 +102,65 @@ const MatchesPage = () => {
     setIsFormOpen(true)
   }
 
-  const handleSaveMatch = (matchData) => {
-    let updatedMatches
-    if (selectedMatch) {
-      updatedMatches = matches.map(m => m.id === matchData.id ? matchData : m)
-    } else {
-      const newMatch = { ...matchData, id: Date.now() }
-      updatedMatches = [...matches, newMatch]
+  const handleSaveMatch = async (matchData) => {
+    try {
+      const headers = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      }
+      const body = JSON.stringify({
+        equipoLocal: matchData.homeTeamId,
+        equipoVisitante: matchData.awayTeamId,
+        fecha: matchData.date,
+        horario: matchData.time,
+        lugar: matchData.location,
+        finalizado: matchData.status === 'Finalizado'
+      })
+
+      if (selectedMatch) {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/partidos/${matchData.id}`, {
+          method: 'PUT', headers, body
+        })
+        if (!res.ok) throw new Error('Error al actualizar el partido')
+        const updated = await res.json()
+        
+        const updatedMatches = matches.map(m => m.id === updated._id ? {
+          ...m,
+          homeTeam: updated.equipoLocal?.nombre || teamsList.find(t => t.id === updated.equipoLocal)?.name || 'Local',
+          homeTeamId: updated.equipoLocal?._id || updated.equipoLocal || '',
+          awayTeam: updated.equipoVisitante?.nombre || teamsList.find(t => t.id === updated.equipoVisitante)?.name || 'Visitante',
+          awayTeamId: updated.equipoVisitante?._id || updated.equipoVisitante || '',
+          date: updated.fecha.split('T')[0],
+          time: updated.horario,
+          location: updated.lugar,
+          status: updated.finalizado ? 'Finalizado' : 'Pendiente'
+        } : m)
+        setMatches(updatedMatches.sort((a, b) => new Date(a.date) - new Date(b.date)))
+      } else {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/partidos`, {
+          method: 'POST', headers, body
+        })
+        if (!res.ok) throw new Error('Error al crear el partido')
+        const created = await res.json()
+        
+        const newMatch = {
+          id: created._id,
+          homeTeam: created.equipoLocal?.nombre || teamsList.find(t => t.id === created.equipoLocal)?.name || 'Local',
+          homeTeamId: created.equipoLocal?._id || created.equipoLocal || '',
+          awayTeam: created.equipoVisitante?.nombre || teamsList.find(t => t.id === created.equipoVisitante)?.name || 'Visitante',
+          awayTeamId: created.equipoVisitante?._id || created.equipoVisitante || '',
+          date: created.fecha.split('T')[0],
+          time: created.horario,
+          location: created.lugar,
+          status: created.finalizado ? 'Finalizado' : 'Pendiente'
+        }
+        setMatches([...matches, newMatch].sort((a, b) => new Date(a.date) - new Date(b.date)))
+      }
+      setIsFormOpen(false)
+      setSelectedMatch(null)
+    } catch (err) {
+      alert(err.message)
     }
-    // Resort by date
-    setMatches(updatedMatches.sort((a, b) => new Date(a.date) - new Date(b.date)))
-    setIsFormOpen(false)
-    setSelectedMatch(null)
   }
 
   const handleOpenDetail = (match) => {
@@ -110,10 +173,19 @@ const MatchesPage = () => {
     setIsDeleteOpen(true)
   }
 
-  const handleDeleteMatch = (id) => {
-    setMatches(matches.filter(m => m.id !== id))
-    setIsDeleteOpen(false)
-    setSelectedMatch(null)
+  const handleDeleteMatch = async (id) => {
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/partidos/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+      })
+      if (!res.ok) throw new Error('Error al eliminar')
+      setMatches(matches.filter(m => m.id !== id))
+      setIsDeleteOpen(false)
+      setSelectedMatch(null)
+    } catch (err) {
+      alert(err.message)
+    }
   }
 
   return (
@@ -158,7 +230,7 @@ const MatchesPage = () => {
                 onTeamFilterChange={setTeamFilter}
                 dateFilter={dateFilter}
                 onDateFilterChange={setDateFilter}
-                teamsList={mockTeamsList}
+                teamsList={teamsList.map(t => t.name)}
               />
 
               <MatchesTable 
@@ -197,7 +269,7 @@ const MatchesPage = () => {
         onClose={() => setIsFormOpen(false)} 
         onSave={handleSaveMatch} 
         match={selectedMatch}
-        teamsList={mockTeamsList}
+        teamsList={teamsList}
       />
       
       <MatchDetailModal 

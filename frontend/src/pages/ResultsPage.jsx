@@ -10,19 +10,12 @@ import ResultDetailModal from '../components/results/ResultDetailModal'
 import '../styles/dashboard.css'
 import '../styles/results.css'
 
-// Initial mock data
-const initialResults = [
-  { id: 1, homeTeam: "Hawks", awayTeam: "Tigers", date: "2026-06-18", time: "18:00", location: "Estadio Central", homeScore: 72, awayScore: 68, status: "Finalizado" },
-  { id: 2, homeTeam: "Lions", awayTeam: "Eagles", date: "2026-06-19", time: "20:00", location: "Polideportivo Norte", homeScore: 80, awayScore: 85, status: "Finalizado" },
-  { id: 3, homeTeam: "Tigers", awayTeam: "Lions", date: "2026-06-25", time: "19:30", location: "Estadio Central", homeScore: null, awayScore: null, status: "Pendiente" },
-  { id: 4, homeTeam: "Eagles", awayTeam: "Hawks", date: "2026-06-28", time: "17:00", location: "Arena Sur", homeScore: null, awayScore: null, status: "Pendiente" },
-]
-
-const mockTeamsList = ["Hawks", "Tigers", "Lions", "Eagles"]
+// API integrated, no mock data needed
 
 const ResultsPage = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [results, setResults] = useState([])
+  const [teamsList, setTeamsList] = useState([])
   const [loading, setLoading] = useState(true)
   
   // Search and Filter states
@@ -36,18 +29,41 @@ const ResultsPage = () => {
   const [isDetailOpen, setIsDetailOpen] = useState(false)
   const [selectedResult, setSelectedResult] = useState(null)
 
-  // Simulate initial data loading
   useEffect(() => {
-    const fetchResults = async () => {
-      setLoading(true)
-      // Simulate network delay
-      await new Promise(resolve => setTimeout(resolve, 800))
-      // Sort matches by date descending (latest first for results)
-      const sorted = [...initialResults].sort((a, b) => new Date(b.date) - new Date(a.date))
-      setResults(sorted)
-      setLoading(false)
+    const fetchData = async () => {
+      try {
+        const headers = { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+        const [partidosRes, equiposRes] = await Promise.all([
+          fetch(`${import.meta.env.VITE_API_URL}/partidos`, { headers }),
+          fetch(`${import.meta.env.VITE_API_URL}/equipos`, { headers })
+        ])
+        if (!partidosRes.ok || !equiposRes.ok) throw new Error('Error al cargar datos')
+        
+        const partidos = await partidosRes.json()
+        const equipos = await equiposRes.json()
+
+        setTeamsList(equipos.map(e => ({ id: e._id, name: e.nombre })))
+        
+        const mappedData = partidos.map(m => ({
+          id: m._id,
+          homeTeam: m.equipoLocal?.nombre || 'Local',
+          awayTeam: m.equipoVisitante?.nombre || 'Visitante',
+          date: m.fecha.split('T')[0],
+          time: m.horario,
+          location: m.lugar,
+          homeScore: m.resultado?.puntosLocal !== undefined ? m.resultado.puntosLocal : null,
+          awayScore: m.resultado?.puntosVisitante !== undefined ? m.resultado.puntosVisitante : null,
+          status: m.finalizado ? 'Finalizado' : 'Pendiente',
+        }))
+        
+        setResults(mappedData.sort((a, b) => new Date(b.date) - new Date(a.date)))
+      } catch (err) {
+        console.error(err)
+      } finally {
+        setLoading(false)
+      }
     }
-    fetchResults()
+    fetchData()
   }, [])
 
   // Derived state: Filtered results
@@ -90,12 +106,28 @@ const ResultsPage = () => {
     setIsFormOpen(true)
   }
 
-  const handleSaveResult = (resultData) => {
-    const updatedResults = results.map(r => r.id === resultData.id ? resultData : r)
-    // Re-sort just in case
-    setResults(updatedResults.sort((a, b) => new Date(b.date) - new Date(a.date)))
-    setIsFormOpen(false)
-    setSelectedResult(null)
+  const handleSaveResult = async (resultData) => {
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/partidos/${resultData.id}/resultado`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({
+          puntosLocal: resultData.homeScore,
+          puntosVisitante: resultData.awayScore
+        })
+      })
+      if (!res.ok) throw new Error('Error al cargar resultado')
+      
+      const updatedResults = results.map(r => r.id === resultData.id ? resultData : r)
+      setResults(updatedResults.sort((a, b) => new Date(b.date) - new Date(a.date)))
+      setIsFormOpen(false)
+      setSelectedResult(null)
+    } catch (err) {
+      alert(err.message)
+    }
   }
 
   const handleOpenDetail = (result) => {
@@ -142,7 +174,7 @@ const ResultsPage = () => {
                 onTeamFilterChange={setTeamFilter}
                 dateFilter={dateFilter}
                 onDateFilterChange={setDateFilter}
-                teamsList={mockTeamsList}
+                teamsList={teamsList.map(t => t.name)}
               />
 
               <ResultsTable 
