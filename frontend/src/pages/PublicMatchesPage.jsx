@@ -40,8 +40,8 @@ const PublicMatchesPage = () => {
         
         const mappedData = data.map(m => ({
           id: m._id,
-          homeTeam: m.equipoLocal.nombre,
-          awayTeam: m.equipoVisitante.nombre,
+          homeTeam: m.equipoLocal?.nombre || 'Local (Eliminado)',
+          awayTeam: m.equipoVisitante?.nombre || 'Visitante (Eliminado)',
           date: m.fecha.split('T')[0], // YYYY-MM-DD
           time: m.horario,
           location: m.lugar,

@@ -93,7 +93,8 @@ const PublicTeamDetailPage = () => {
   // Helper to determine W/D/L for the team
   const getMatchResult = (partido) => {
     if (!partido.finalizado || !partido.resultado) return null
-    const isLocal = partido.equipoLocal.nombre === equipo.nombre
+    const localName = partido.equipoLocal?.nombre || 'Local (Eliminado)'
+    const isLocal = localName === equipo.nombre
     const ptsTeam = isLocal ? partido.resultado.puntosLocal : partido.resultado.puntosVisitante
     const ptsRival = isLocal ? partido.resultado.puntosVisitante : partido.resultado.puntosLocal
     
@@ -211,8 +212,10 @@ const PublicTeamDetailPage = () => {
                     </thead>
                     <tbody>
                       {partidosJugados.map(p => {
-                        const isLocal = p.equipoLocal.nombre === equipo.nombre
-                        const rival = isLocal ? p.equipoVisitante.nombre : p.equipoLocal.nombre
+                        const localName = p.equipoLocal?.nombre || 'Local (Eliminado)'
+                        const visName = p.equipoVisitante?.nombre || 'Visitante (Eliminado)'
+                        const isLocal = localName === equipo.nombre
+                        const rival = isLocal ? visName : localName
                         const resType = getMatchResult(p)
                         const resLabel = resType === 'ganado' ? 'G' : resType === 'perdido' ? 'P' : 'E'
                         
@@ -238,8 +241,10 @@ const PublicTeamDetailPage = () => {
                 {/* Mobile Cards */}
                 <div className="team-detail-matches-cards">
                   {partidosJugados.map(p => {
-                    const isLocal = p.equipoLocal.nombre === equipo.nombre
-                    const rival = isLocal ? p.equipoVisitante.nombre : p.equipoLocal.nombre
+                    const localName = p.equipoLocal?.nombre || 'Local (Eliminado)'
+                    const visName = p.equipoVisitante?.nombre || 'Visitante (Eliminado)'
+                    const isLocal = localName === equipo.nombre
+                    const rival = isLocal ? visName : localName
                     const resType = getMatchResult(p)
                     const resLabel = resType === 'ganado' ? 'Ganado' : resType === 'perdido' ? 'Perdido' : 'Empate'
                     
@@ -274,8 +279,10 @@ const PublicTeamDetailPage = () => {
             ) : (
               <div className="team-detail-matches-cards" style={{display: 'grid'}}>
                 {partidosPendientes.map(p => {
-                  const isLocal = p.equipoLocal.nombre === equipo.nombre
-                  const rival = isLocal ? p.equipoVisitante.nombre : p.equipoLocal.nombre
+                  const localName = p.equipoLocal?.nombre || 'Local (Eliminado)'
+                  const visName = p.equipoVisitante?.nombre || 'Visitante (Eliminado)'
+                  const isLocal = localName === equipo.nombre
+                  const rival = isLocal ? visName : localName
                   
                   return (
                     <div key={p._id} className="team-match-card">
