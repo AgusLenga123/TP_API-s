@@ -22,9 +22,9 @@ const MatchDetailModal = ({ isOpen, onClose, match }) => {
               <div className="match-detail__vs-badge">VS</div>
               <div className="match-detail__team">{match.awayTeam}</div>
             </div>
-            {match.status === 'Finalizado' && (
+            {match.status === 'Finalizado' && match.resultado && (
               <div style={{fontSize: '2rem', fontWeight: 800, color: 'var(--color-primary)', marginTop: 'var(--space-2)'}}>
-                72 - 68
+                {match.resultado.puntosLocal} - {match.resultado.puntosVisitante}
               </div>
             )}
           </div>
