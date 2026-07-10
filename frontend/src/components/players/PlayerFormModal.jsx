@@ -102,9 +102,10 @@ const PlayerFormModal = ({ isOpen, onClose, onSave, player, teamsList }) => {
                 onChange={(e) => setFormData({ ...formData, category: e.target.value })}
               >
                 <option value="">Seleccionar categoría...</option>
-                <option value="Sub 15">Sub 15</option>
-                <option value="Sub 17">Sub 17</option>
-                <option value="Sub 19">Sub 19</option>
+                <option value="Sub-13">Sub-13</option>
+                <option value="Sub-15">Sub-15</option>
+                <option value="Sub-17">Sub-17</option>
+                <option value="Mayor">Mayor</option>
               </select>
               {errors.category && <span className="form-error">{errors.category}</span>}
             </div>

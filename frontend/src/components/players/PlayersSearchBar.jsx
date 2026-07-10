@@ -22,22 +22,28 @@ const PlayersSearchBar = ({ searchTerm, onSearchChange, categoryFilter, onCatego
           Todos
         </button>
         <button
-          className={`players-filters__btn ${categoryFilter === 'Sub 15' ? 'players-filters__btn--active' : ''}`}
-          onClick={() => onCategoryFilterChange('Sub 15')}
+          className={`players-filters__btn ${categoryFilter === 'Sub-13' ? 'players-filters__btn--active' : ''}`}
+          onClick={() => onCategoryFilterChange('Sub-13')}
         >
-          Sub 15
+          Sub-13
         </button>
         <button
-          className={`players-filters__btn ${categoryFilter === 'Sub 17' ? 'players-filters__btn--active' : ''}`}
-          onClick={() => onCategoryFilterChange('Sub 17')}
+          className={`players-filters__btn ${categoryFilter === 'Sub-15' ? 'players-filters__btn--active' : ''}`}
+          onClick={() => onCategoryFilterChange('Sub-15')}
         >
-          Sub 17
+          Sub-15
         </button>
         <button
-          className={`players-filters__btn ${categoryFilter === 'Sub 19' ? 'players-filters__btn--active' : ''}`}
-          onClick={() => onCategoryFilterChange('Sub 19')}
+          className={`players-filters__btn ${categoryFilter === 'Sub-17' ? 'players-filters__btn--active' : ''}`}
+          onClick={() => onCategoryFilterChange('Sub-17')}
         >
-          Sub 19
+          Sub-17
+        </button>
+        <button
+          className={`players-filters__btn ${categoryFilter === 'Mayor' ? 'players-filters__btn--active' : ''}`}
+          onClick={() => onCategoryFilterChange('Mayor')}
+        >
+          Mayor
         </button>
 
         <select 

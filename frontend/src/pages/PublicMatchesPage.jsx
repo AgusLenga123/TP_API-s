@@ -22,6 +22,14 @@ const PublicMatchesPage = () => {
   // Modal states
   const [isDetailOpen, setIsDetailOpen] = useState(false)
   const [selectedMatch, setSelectedMatch] = useState(null)
+  
+  // Pagination state
+  const [visibleCount, setVisibleCount] = useState(10)
+
+  // Reset pagination when filters change
+  useEffect(() => {
+    setVisibleCount(10)
+  }, [searchTerm, statusFilter, teamFilter, dateFilter])
 
   useEffect(() => {
     const fetchMatches = async () => {
@@ -72,6 +80,8 @@ const PublicMatchesPage = () => {
     return matchesSearch && matchesStatus && matchesTeam && matchesDate
   })
 
+  const visibleMatches = filteredMatches.slice(0, visibleCount)
+
   // Handlers
   const handleOpenDetail = (match) => {
     setSelectedMatch(match)
@@ -119,12 +129,12 @@ const PublicMatchesPage = () => {
           />
 
           <MatchesTable 
-            matches={filteredMatches} 
+            matches={visibleMatches} 
             onView={handleOpenDetail} 
           />
 
           <div className="matches-cards">
-            {filteredMatches.map(match => (
+            {visibleMatches.map(match => (
               <MatchCard 
                 key={match.id} 
                 match={match} 
@@ -139,6 +149,17 @@ const PublicMatchesPage = () => {
                </div>
             )}
           </div>
+
+          {visibleCount < filteredMatches.length && (
+            <div style={{display: 'flex', justifyContent: 'center', marginTop: 'var(--space-6)'}}>
+              <button 
+                className="btn btn-outline" 
+                onClick={() => setVisibleCount(prev => prev + 10)}
+              >
+                Cargar más partidos
+              </button>
+            </div>
+          )}
         </>
       )}
 

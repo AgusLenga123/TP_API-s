@@ -1,6 +1,31 @@
+import { useState, useEffect } from 'react';
 import './Hero.css'
 
 const Hero = () => {
+  const [leader, setLeader] = useState(null);
+  const [topScorer, setTopScorer] = useState(null);
+
+  useEffect(() => {
+    const fetchStandings = async () => {
+      try {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/clasificacion`);
+        const data = await response.json();
+        if (data && data.length > 0) {
+          setLeader(data[0]); // El primer equipo en la clasificación
+          
+          // Encontrar el equipo con más tantos a favor
+          const mostScoringTeam = data.reduce((max, team) => 
+            team.tantosAFavor > max.tantosAFavor ? team : max
+          , data[0]);
+          setTopScorer(mostScoringTeam);
+        }
+      } catch (err) {
+        console.error("Error fetching standings for Hero:", err);
+      }
+    };
+    fetchStandings();
+  }, []);
+
   return (
     <section className="hero" id="hero">
       <div className="hero__bg-elements">
@@ -99,16 +124,16 @@ const Hero = () => {
             <div className="hero__float-card hero__float-card--1">
               <span className="hero__float-icon">🏆</span>
               <div>
-                <strong>Hawks</strong>
-                <span>Líder</span>
+                <strong>{leader ? leader.nombre : 'Cargando...'}</strong>
+                <span>Líder {leader ? `(${leader.puntos} pts)` : ''}</span>
               </div>
             </div>
 
             <div className="hero__float-card hero__float-card--2">
-              <span className="hero__float-icon">📊</span>
+              <span className="hero__float-icon">🔥</span>
               <div>
-                <strong>+15 pts</strong>
-                <span>Promedio</span>
+                <strong>{topScorer ? topScorer.nombre : 'Cargando...'}</strong>
+                <span>{topScorer ? `${topScorer.tantosAFavor} pts anotados` : ''}</span>
               </div>
             </div>
           </div>

@@ -1,275 +1,105 @@
-# 🏀 Basketball Liga API
+# Sistema de Gestión - Liga Juvenil de Baloncesto 🏀
 
-API REST para la gestión integral de una liga de baloncesto juvenil.  
-Stack: **Node.js · Express · MongoDB (Mongoose) · JWT**
+Documentación oficial del proyecto desarrollado para la asignatura de Desarrollo de Aplicaciones Web.
 
 ---
 
-## 🖥️ Setup en nueva máquina
+## 1. Arquitectura del Sistema
 
-Si clonás este repo en otra computadora, seguí estos pasos:
+El proyecto sigue una arquitectura **Cliente-Servidor (Frontend / Backend)** comunicados a través de una API RESTful.
 
+*   **Frontend (Cliente):** Desarrollado como una *Single Page Application (SPA)* utilizando **React** y empaquetado con **Vite**. Todo el enrutamiento se maneja del lado del cliente con `react-router-dom`. El diseño visual es responsivo y está construido estrictamente con **HTML y Vanilla CSS**.
+*   **Backend (Servidor):** Construido sobre **Node.js** utilizando el framework **Express.js**. Sigue el patrón de diseño MVC (Modelos, Controladores y Servicios). 
+*   **Base de Datos:** Se utiliza **MongoDB** (NoSQL) alojado en la nube mediante *MongoDB Atlas*. Las consultas y esquemas se manejan con `mongoose`.
+*   **Seguridad:** Las rutas administrativas están protegidas mediante **JSON Web Tokens (JWT)**. Las contraseñas de los usuarios administradores se encuentran encriptadas en la base de datos utilizando `bcrypt`.
+
+---
+
+## 2. Requisitos Previos
+
+Para poder ejecutar este proyecto de forma local, es necesario contar con:
+*   [Node.js](https://nodejs.org/es/) (Versión 18.0.0 o superior).
+*   NPM (Instalado por defecto con Node.js).
+*   Conexión a internet estable (para conectar con la base de datos MongoDB Atlas).
+
+---
+
+## 3. Instalación y Configuración
+
+### Configuración del Backend (API)
+1. Abrir una terminal en la carpeta raíz del proyecto (`TP_API-s`).
+2. Instalar las dependencias del servidor:
+   ```bash
+   npm install
+   ```
+3. Verificar que exista el archivo `.env` en la raíz con la siguiente estructura:
+   ```env
+   PORT=3001
+   MONGODB_URI=mongodb+srv://<usuario>:<password>@<cluster>.mongodb.net/<nombre_db>?retryWrites=true&w=majority&appName=<appName>
+   JWT_SECRET=tu_secreto_super_seguro
+   ```
+
+### Configuración del Frontend
+1. Abrir una terminal y navegar hacia la carpeta `frontend`:
+   ```bash
+   cd frontend
+   ```
+2. Instalar las dependencias del cliente:
+   ```bash
+   npm install
+   ```
+3. Verificar que exista el archivo `.env` dentro de la carpeta `frontend` indicando la ruta hacia la API:
+   ```env
+   VITE_API_URL=http://localhost:3001/api
+   ```
+
+---
+
+## 4. Ejecución del Sistema
+
+Para levantar el sistema de manera local, se deben iniciar ambos servidores de forma simultánea.
+
+**Iniciar Backend:**
+En la carpeta raíz (`TP_API-s`):
 ```bash
-# 1. Clonar el repositorio
-git clone https://github.com/AgusLenga123/TP_API-s.git
-cd TP_API-s
-
-# 2. Instalar dependencias
-npm install
-
-# 3. Crear el archivo de entorno
-copy .env.example .env   # Windows
-# cp .env.example .env   # Mac/Linux
-```
-
-Luego abrí el `.env` y completá:
-- `MONGODB_URI` → tu connection string de MongoDB Atlas (siempre disponible en [cloud.mongodb.com](https://cloud.mongodb.com) → Connect)
-- `JWT_SECRET` → generalo con `node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"`
-
-```bash
-# 4. Poblar la base de datos (primera vez)
-npm run seed
-
-# 5. Iniciar el servidor
 npm run dev
 ```
+*(El servidor indicará "MongoDB conectado" y se levantará en el puerto 3001).*
 
-> ✅ La base de datos está en MongoDB Atlas (en la nube), así que los datos persisten entre máquinas automáticamente.
-
----
-
-## Instalación
-
+**Iniciar Frontend:**
+En una **nueva** terminal, dentro de la carpeta `frontend`:
 ```bash
-# 1. Instalar dependencias
-npm install
-
-# 2. Configurar variables de entorno
-cp .env.example .env
-# Editar .env con tus valores
-
-# 3. Cargar datos de prueba (opcional pero recomendado)
-npm run seed
-
-# 4. Iniciar en desarrollo
 npm run dev
-
-# 5. Iniciar en producción
-npm start
 ```
-
-> ⚠️ El servidor valida al arrancar que `MONGODB_URI` y `JWT_SECRET` estén definidos. Si falta alguno, el proceso termina con un mensaje claro.
+*(El sitio web estará disponible en `http://localhost:5173/`).*
 
 ---
 
-## Credenciales de prueba (tras ejecutar `npm run seed`)
+## 5. Credenciales de Prueba (Testing)
 
-| Campo    | Valor       |
-|----------|-------------|
-| Usuario  | `admin`     |
-| Password | `Admin1234` |
+El sistema cuenta con un administrador precargado para probar las funcionalidades de edición.
 
----
-
-## Variables de entorno (`.env`)
-
-| Variable        | Descripción                        | Ejemplo                                     |
-|-----------------|------------------------------------|---------------------------------------------|
-| `PORT`          | Puerto del servidor                | `3001`                                      |
-| `MONGODB_URI`   | URI de conexión a MongoDB          | `mongodb://localhost:27017/basketball_liga` |
-| `JWT_SECRET`    | Secreto para firmar tokens JWT     | `mi_secreto_seguro`                         |
-| `JWT_EXPIRES_IN`| Expiración del token               | `24h`                                       |
+*   **Ruta de acceso:** `http://localhost:5173/login`
+*   **Usuario:** `admin`
+*   **Contraseña:** `Admin1234`
 
 ---
 
-## Crear el primer administrador
+## 6. Manual de Usuario
 
-Al iniciar el proyecto por primera vez, crear el admin así:
+El sistema se divide en dos áreas principales: Pública y Administrativa.
 
-```http
-POST /api/auth/setup
-Content-Type: application/json
+### 6.1. Vista Pública (Sin inicio de sesión)
+Cualquier usuario que ingrese a la página principal podrá:
+*   **Landing Page:** Ver estadísticas destacadas de la liga y resúmenes.
+*   **Clasificación:** Acceder a la tabla de posiciones general ordenada de forma automática según reglas de puntuación y desempate.
+*   **Partidos:** Ver el calendario completo. Hacer clic en un partido abre un modal (popup) con detalles de fecha, horario y resultado (si el partido ya finalizó).
+*   **Equipos:** Ver todas las franquicias participantes. Hacer clic en un equipo permite ver su plantilla de jugadores, cuerpo técnico y estadísticas.
 
-{
-  "usuario": "admin",
-  "password": "tu_password"
-}
-```
+### 6.2. Área Administrativa (Requiere inicio de sesión)
+Una vez ingresadas las credenciales de administrador en la ruta `/login`, el usuario tiene control total:
 
-> ⚠️ Deshabilitar o proteger este endpoint antes de ir a producción.
-
----
-
-## Autenticación
-
-Las rutas protegidas requieren un token JWT en el header:
-
-```
-Authorization: Bearer <token>
-```
-
-El token se obtiene haciendo login en `POST /api/auth/login`.
-
----
-
-## Endpoints
-
-### AUTH
-
-| Método | Ruta              | Acceso | Descripción                  |
-|--------|-------------------|--------|------------------------------|
-| POST   | `/api/auth/login` | Público | Login de administrador       |
-| POST   | `/api/auth/setup` | Público | Crear el primer admin        |
-
----
-
-### EQUIPOS
-
-| Método | Ruta               | Acceso      | Descripción                           |
-|--------|--------------------|-------------|---------------------------------------|
-| GET    | `/api/equipos`     | Público     | Listar todos los equipos              |
-| GET    | `/api/equipos/:id` | Público     | Detalle de equipo + partidos          |
-| POST   | `/api/equipos`     | Admin (JWT) | Crear equipo                          |
-| PUT    | `/api/equipos/:id` | Admin (JWT) | Actualizar equipo                     |
-| DELETE | `/api/equipos/:id` | Admin (JWT) | Eliminar equipo y sus jugadores       |
-
-**Body para crear/actualizar equipo:**
-```json
-{
-  "nombre": "Los Cóndores",
-  "entrenador": "Juan Pérez"
-}
-```
-
----
-
-### JUGADORES
-
-| Método | Ruta                 | Acceso      | Descripción                               |
-|--------|----------------------|-------------|-------------------------------------------|
-| GET    | `/api/jugadores`     | Público     | Listar jugadores (opcional: `?equipoId=`) |
-| GET    | `/api/jugadores/:id` | Público     | Detalle de jugador                        |
-| POST   | `/api/jugadores`     | Admin (JWT) | Crear jugador                             |
-| PUT    | `/api/jugadores/:id` | Admin (JWT) | Actualizar jugador                        |
-| DELETE | `/api/jugadores/:id` | Admin (JWT) | Eliminar jugador                          |
-
-**Body para crear/actualizar jugador:**
-```json
-{
-  "nombre": "Carlos",
-  "apellido": "García",
-  "categoria": "Sub-17",
-  "equipo": "<equipoId>"
-}
-```
-
----
-
-### PARTIDOS
-
-| Método | Ruta                          | Acceso      | Descripción                                 |
-|--------|-------------------------------|-------------|---------------------------------------------|
-| GET    | `/api/partidos`               | Público     | Listar partidos (opcional: `?equipoId=`, `?finalizado=true/false`) |
-| GET    | `/api/partidos/:id`           | Público     | Detalle de partido                          |
-| POST   | `/api/partidos`               | Admin (JWT) | Crear partido                               |
-| PUT    | `/api/partidos/:id`           | Admin (JWT) | Editar partido (no finalizado)              |
-| DELETE | `/api/partidos/:id`           | Admin (JWT) | Eliminar partido                            |
-| PATCH  | `/api/partidos/:id/resultado` | Admin (JWT) | Cargar resultado y actualizar estadísticas  |
-
-**Body para crear partido:**
-```json
-{
-  "equipoLocal": "<equipoId>",
-  "equipoVisitante": "<equipoId>",
-  "fecha": "2025-06-15",
-  "horario": "18:00",
-  "lugar": "Gimnasio Municipal"
-}
-```
-
-**Body para cargar resultado:**
-```json
-{
-  "puntosLocal": 78,
-  "puntosVisitante": 65
-}
-```
-
----
-
-### CLASIFICACIÓN
-
-| Método | Ruta                  | Acceso  | Descripción                                |
-|--------|-----------------------|---------|--------------------------------------------|
-| GET    | `/api/clasificacion`  | Público | Tabla de clasificación ordenada            |
-
-**Respuesta de ejemplo:**
-```json
-[
-  {
-    "posicion": 1,
-    "nombre": "Los Cóndores",
-    "puntos": 9,
-    "partidosJugados": 3,
-    "partidosGanados": 3,
-    "partidosEmpatados": 0,
-    "partidosPerdidos": 0,
-    "tantosAFavor": 240,
-    "tantosEnContra": 180,
-    "diferenciaDeTantos": 60
-  }
-]
-```
-
----
-
-## Reglas de puntuación
-
-| Resultado      | Puntos |
-|----------------|--------|
-| Partido ganado | 3      |
-| Partido empatado | 1    |
-| Partido perdido | 0     |
-
-**Desempate:** 1° diferencia de tantos → 2° tantos a favor
-
----
-
-## Estructura del proyecto
-
-```
-basketball-api/
-├── src/
-│   ├── app.js                    # Entry point
-│   ├── config/
-│   │   └── db.js                 # Conexión MongoDB
-│   ├── models/
-│   │   ├── Admin.model.js
-│   │   ├── Equipo.model.js
-│   │   ├── Jugador.model.js
-│   │   └── Partido.model.js
-│   ├── services/
-│   │   ├── auth.service.js
-│   │   ├── clasificacion.service.js
-│   │   ├── equipo.service.js
-│   │   ├── jugador.service.js
-│   │   └── partido.service.js
-│   ├── controllers/
-│   │   ├── auth.controller.js
-│   │   ├── clasificacion.controller.js
-│   │   ├── equipo.controller.js
-│   │   ├── jugador.controller.js
-│   │   └── partido.controller.js
-│   ├── routes/
-│   │   ├── auth.routes.js
-│   │   ├── clasificacion.routes.js
-│   │   ├── equipo.routes.js
-│   │   ├── jugador.routes.js
-│   │   └── partido.routes.js
-│   └── middlewares/
-│       ├── auth.middleware.js
-│       └── errorHandler.js
-├── .env.example
-├── .gitignore
-└── package.json
-```
+*   **Gestión de Equipos:** Permite registrar nuevos equipos, editar su nombre y entrenador, o eliminarlos del torneo.
+*   **Gestión de Jugadores:** Se pueden agregar jugadores asignándolos a categorías específicas (`Sub-13`, `Sub-15`, `Sub-17`, `Mayor`) y vincularlos a un equipo creado previamente.
+*   **Gestión de Partidos:** Permite programar nuevos encuentros definiendo equipo local, visitante, fecha, hora y ubicación. 
+*   **Carga de Resultados:** Dentro de la pestaña de Partidos, el administrador puede editar un encuentro que figura como "Pendiente", ingresar el puntaje final y marcarlo como finalizado. Esto **actualiza de forma automática** la tabla de posiciones y las estadísticas de cada equipo.
